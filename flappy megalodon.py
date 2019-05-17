@@ -39,9 +39,12 @@ class Animated_window(QtWidgets.QWidget) :
         self.obstacles[i] = Obstacle(950 ,0 ,40 ,random.randint(100, 500), 125)
 
     def create_contents(self) :
-        self.time = 0
-        self.gravity = 1
+        self.time = 1
+        self.time_last = 0
+        self.gravity = 25
         self.speed = 1
+        self.perso_yv = 25
+        self.perso_y = 300
         self.setWindowTitle("Flappy Megalodon")
         self.resize(800, 600)
         #box = QtWidgets.QVBoxLayout(self)
@@ -50,10 +53,17 @@ class Animated_window(QtWidgets.QWidget) :
         #box.addWidget(self.draw)
 
     def animation_step(self) :
-        time = datetime.datetime.now() - self.animation_start
-        self.time = time.total_seconds()
-        self.update()
-
+        try :
+            time = datetime.datetime.now() - self.animation_start
+            self.time = time.total_seconds()
+            dt = self.time - self.time_last
+            self.update()
+            self.perso_y = self.perso_y + dt * self.perso_yv
+            self.perso_yv = self.perso_yv + dt * self.gravity
+            self.time_last = self.time
+        except Exception as e :
+            print("Erreur animation_step:", e)
+        
     def paintEvent(self, event) :
         try :
             size = self.size()
@@ -61,12 +71,7 @@ class Animated_window(QtWidgets.QWidget) :
             h = size.height()
             t = 125
             x = 200
-            self.velocity += self.gravity
-            y = self.gravity + 300
-            if y > h:
-                y = h
-            if y < 0 :
-                y = 0
+            y = self.perso_y
             qp = QtGui.QPainter()
             qp.begin(self)
             qp.setRenderHints(QtGui.QPainter.Antialiasing, 1)
@@ -108,7 +113,9 @@ class Animated_window(QtWidgets.QWidget) :
         if key == QtCore.Qt.Key_Escape  :
             self.close()
         elif key == QtCore.Qt.Key_Space :
-            self.velocity -= 25
+            x
+            
+        
             
         
 
