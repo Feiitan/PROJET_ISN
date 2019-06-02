@@ -28,7 +28,7 @@ class Animated_window(QtWidgets.QWidget) :
         self.animation_timer.timeout.connect(self.animation_step)
         self.animation_timer.start(1000 / framerate)
         self.obstacles = [ ]
-        self.obstacles.append(Obstacle(300, 0, 40, random.randint(100, 500), 125))
+        self.obstacles.append(Obstacle(300, 0, 40, 300, 125))
         self.obstacles.append(Obstacle(500, 0, 40, random.randint(100, 500), 125))
         self.obstacles.append(Obstacle(700, 0, 40, random.randint(100, 500), 125))
         self.obstacles.append(Obstacle(900, 0, 40, random.randint(100, 500), 125))
@@ -39,11 +39,12 @@ class Animated_window(QtWidgets.QWidget) :
         self.obstacles[i] = Obstacle(950 ,0 ,40 ,random.randint(100, 500), 125)
 
     def create_contents(self) :
+        self.propulsion = 0
         self.time = 1
         self.time_last = 0
-        self.gravity = 25
-        self.speed = 1
-        self.perso_yv = 25
+        self.gravity = 100
+        self.speed = 1 
+        self.perso_yv = 100
         self.perso_y = 300
         self.setWindowTitle("Flappy Megalodon")
         self.resize(800, 600)
@@ -59,8 +60,10 @@ class Animated_window(QtWidgets.QWidget) :
             dt = self.time - self.time_last
             self.update()
             self.perso_y = self.perso_y + dt * self.perso_yv
-            self.perso_yv = self.perso_yv + dt * self.gravity
-            self.time_last = self.time
+            #print(self.propulsion )
+            self.perso_yv = self.perso_yv + dt * (self.gravity - self.propulsion)
+            self.time_last = self.time 
+                
         except Exception as e :
             print("Erreur animation_step:", e)
         
@@ -69,7 +72,7 @@ class Animated_window(QtWidgets.QWidget) :
             size = self.size()
             w = size.width()
             h = size.height()
-            t = 125
+            t = 150  
             x = 200
             y = self.perso_y
             qp = QtGui.QPainter()
@@ -78,10 +81,10 @@ class Animated_window(QtWidgets.QWidget) :
             #pen = QtGui.QPen(QtGui.QColor(255, 128, 0))
             #qp.setPen(pen)
             path = QtGui.QPainterPath()
-            path.moveTo(x + 25, y)
-            path.lineTo(x, y + 25)
-            path.lineTo(x - 25, y)
-            path.lineTo(x, y - 25)
+            path.moveTo(x - 15,y - 15)
+            path.lineTo(x + 15,y - 15)
+            path.lineTo(x + 15,y + 15)
+            path.lineTo(x - 15,y + 15)
             path.closeSubpath()
             qp.fillPath(path, QtGui.QColor(0, 0, 255))
             #qp.drawPath(path)
@@ -113,16 +116,20 @@ class Animated_window(QtWidgets.QWidget) :
         if key == QtCore.Qt.Key_Escape  :
             self.close()
         elif key == QtCore.Qt.Key_Space :
-            x
+            self.perso_y -= 40
+            self.perso_yv = 100
+            if not event.isAutoRepeat() :
+                print("down")
+                self.propulsion = 100
             
-        
-            
-        
-
     def keyReleaseEvent(self, event):
-        return
-
-
+        key = event.key()
+        if key == QtCore.Qt.Key_Space :
+            if not event.isAutoRepeat() :
+                print("up")
+                self.propulsion = 0
+                
+        
 def main() :
     app = QtWidgets.QApplication(sys.argv)
     clock = Animated_window()
